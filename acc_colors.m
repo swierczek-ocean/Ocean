@@ -1,6 +1,6 @@
 %% Nice Colors for plots
 % % .........................................................................
-Color  = zeros(3,40);
+Color  = zeros(3,45);
 Color(:,1) = [85;170;170]/255;      % Light Blue-Grey
 Color(:,2) = [60;60;230]/255;       % Blue
 Color(:,3) = [170;0;170]/255;       % Bright Purple
@@ -41,4 +41,9 @@ Color(:,37) = [0,0,0];              % Black
 Color(:,38) = [255;204;0]/255;      % Yellow
 Color(:,39) = [0;153;0]/255;        % Green 2
 Color(:,40) = [255;153;0]/255;      % Light Burnt Orange
+Color(:,41) = [255;153;153]/255;    % Light Pink
+Color(:,42) = [255;102;255]/255;    % Light Fuschia
+Color(:,43) = [152;102;153]/255;    % Light Purple Grey
+Color(:,44) = [255;51;0]/255;       % Dark Orange
+Color(:,45) = [204;153;102]/255;    % Light Copper
 % .........................................................................
