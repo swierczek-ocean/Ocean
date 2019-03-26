@@ -710,6 +710,7 @@ for qq=1:10
         nlvls = 21;
     end
         
+    lb = -ub;
     A = isnan(A);
     z = linspace(lb,ub,nlvls);
     

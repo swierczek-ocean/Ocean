@@ -35,7 +35,7 @@ nlvls = 200;
 str = '_bsose_ts_vl_';
 cm = [Color(:,46)';cm;Color(:,46)'];
 
-for qq=1:1
+for qq=2:2
     if qq==1
         THETA_Mooring = Obs_20;
         THETA_Mooring = THETA_Mooring(isnan(THETA_Mooring(:,4))==0,:);
@@ -98,20 +98,15 @@ for qq=1:1
     axis(coords)
     xtickformat('degrees')
     ytickformat('degrees')
-    title(['BSOSE vs. Argo temperature (degrees C) at ',num2str(depth_names(qq)),'m'],'FontWeight','Normal')
+    % title(['BSOSE vs. Argo temperature (degrees C) at ',num2str(depth_names(qq)),'m'],'FontWeight','Normal')
     acc_movie
     acc_plots
-    text(292,-37.5,datestr(numdate,'yyyy mmm dd'),'FontSize',28,'Color','w')
+    % text(292,-37.5,datestr(numdate,'yyyy mmm dd'),'FontSize',28,'Color','w')
     hold off
-    set(gca, 'nextplot','replacechildren', 'Visible','on');
-    vidObj = VideoWriter(['THETA_BSOSE_OBS_',num2str(depth_names(qq)),'m.avi']);
-    vidObj.Quality = 100;
-    vidObj.FrameRate = 8;
-    open(vidObj);
-    writeVideo(vidObj, getframe(gcf));
+    print(['T_BSOSE_',datestr(numdate,'yyyymmdd'),'_',num2str(depth_names(qq)),'m'],'-djpeg')
     
-    for ii=2:NZ
-        numdate = numdate + 1;
+    for ii=8:7:NZ
+        numdate = numdate + 7;
         dtstr_t = str2double(datestr(numdate,'yyyymmdd'));
         Obs_Array_t = THETA_Obs(THETA_Obs(:,1)==dtstr_t,[2,3,argo_depth(qq)]);
         Obs_Array_t = Obs_Array_t(isnan(Obs_Array_t(:,3))==0,:);
@@ -146,6 +141,9 @@ for qq=1:1
             Obs_Array_t3 = Obs_Array_t3(isnan(Obs_Array_t3(:,3))==0,:);
         end
         
+            figure()
+    set(gcf, 'Position', [1, 1, 1600, 900])
+    colormap(cm)
         contourf(XC,YC,U(:,:,ii),'LineStyle','none','LevelList',z);
         cbar = colorbar('eastoutside');
         set(cbar,'YLim',[lb ub]);
@@ -181,17 +179,16 @@ for qq=1:1
         end
         caxis([lb ub])
         axis(coords)
-        title(['BSOSE vs. Argo temperature (degrees C) at ',num2str(depth_names(qq)),'m'],'FontWeight','Normal')
+        % title(['BSOSE vs. Argo temperature (degrees C) at ',num2str(depth_names(qq)),'m'],'FontWeight','Normal')
         xtickformat('degrees')
         ytickformat('degrees')
         acc_movie
-        text(292,-37.5,datestr(numdate,'yyyy mmm dd'),'FontSize',28,'Color','w')
-        drawnow()
-        writeVideo(vidObj, getframe(gcf));
+        acc_plots
+        % text(292,-37.5,datestr(numdate,'yyyy mmm dd'),'FontSize',28,'Color','w')
         hold off
+        print(['T_BSOSE_',datestr(numdate,'yyyymmdd'),'_',num2str(depth_names(qq)),'m'],'-djpeg')
     end
     
-    close(vidObj);
     close all
     clear z U
 end
@@ -206,7 +203,7 @@ cm = [cm(1,:);cm(1,:);cm(1,:);cm;Color(:,46)'];
 
 
 
-for qq=1:1
+for qq=2:2
     if qq==1
         SALT_Mooring = Obs_20;
         SALT_Mooring = SALT_Mooring(isnan(SALT_Mooring(:,5))==0,:);
@@ -277,20 +274,15 @@ for qq=1:1
     axis(coords)
     xtickformat('degrees')
     ytickformat('degrees')
-    title(['BSOSE vs. Argo salinity (psu) at ',num2str(depth_names(qq)),'m'],'FontWeight','Normal')
+    % title(['BSOSE vs. Argo salinity (psu) at ',num2str(depth_names(qq)),'m'],'FontWeight','Normal')
     acc_movie
     acc_plots
-    text(292,-37.5,datestr(numdate,'yyyy mmm dd'),'FontSize',28,'Color','w')
+    % text(292,-37.5,datestr(numdate,'yyyy mmm dd'),'FontSize',28,'Color','w')
     hold off
-    set(gca, 'nextplot','replacechildren', 'Visible','on');
-    vidObj = VideoWriter(['SALT_BSOSE_OBS_',num2str(depth_names(qq)),'m.avi']);
-    vidObj.Quality = 100;
-    vidObj.FrameRate = 8;
-    open(vidObj);
-    writeVideo(vidObj, getframe(gcf));
+    print(['S_BSOSE_',datestr(numdate,'yyyymmdd'),'_',num2str(depth_names(qq)),'m'],'-djpeg')
     
-    for ii=2:NZ
-        numdate = numdate + 1;
+    for ii=7:6:NZ
+        numdate = numdate + 6;
         dtstr_t = str2double(datestr(numdate,'yyyymmdd'));
         Obs_Array_t = SALT_Obs(SALT_Obs(:,1)==dtstr_t,[2,3,argo_depth(qq)]);
         Obs_Array_t = Obs_Array_t(isnan(Obs_Array_t(:,3))==0,:);
@@ -324,6 +316,9 @@ for qq=1:1
             Obs_Array_t3 = Obs_Array_t3(isnan(Obs_Array_t3(:,3))==0,:);
         end
         
+            figure()
+    set(gcf, 'Position', [1, 1, 1600, 900])
+    colormap(cm)
         contourf(XC,YC,U(:,:,ii),'LineStyle','none','LevelList',z);
         cbar = colorbar('eastoutside');
         set(cbar,'YLim',[lb ub]);
@@ -360,17 +355,18 @@ for qq=1:1
         caxis([lb ub])
         axis(coords)
         
-        title(['BSOSE vs. Argo salinity (psu) at ',num2str(depth_names(qq)),'m'],'FontWeight','Normal')
+        % title(['BSOSE vs. Argo salinity (psu) at ',num2str(depth_names(qq)),'m'],'FontWeight','Normal')
         xtickformat('degrees')
         ytickformat('degrees')
         acc_movie
-        text(292,-37.5,datestr(numdate,'yyyy mmm dd'),'FontSize',28,'Color','w')
-        drawnow()
-        writeVideo(vidObj, getframe(gcf));
+        acc_plots
+        % text(292,-37.5,datestr(numdate,'yyyy mmm dd'),'FontSize',28,'Color','w')
+        print(['S_BSOSE_',datestr(numdate,'yyyymmdd'),'_',num2str(depth_names(qq)),'m'],'-djpeg')
+        
         hold off
     end
     
-    close(vidObj);
+    
     close all
     clear z U
 end

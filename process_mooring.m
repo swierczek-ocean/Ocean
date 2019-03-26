@@ -5,7 +5,7 @@
 % ncdisp(str2)
 % pressure_temp = ncread(str2,'pressure_temp');
 
-str3 = '../OOI_Data/deployment0003_GA02HYPM-WFP02-04-CTDPFL000-recovered_wfp-ctdpf_ckl_wfp_instrument_recovered_20161030T000003-20171003T185844.999253.nc';
+str3 = '../OOI_Data/deployment0003_GA01SUMO-SBD12-06-METBKA000-telemetered-metbk_a_dcl_instrument_20161027T014717.360000-20171022T084451.670000.nc';
 
 ncdisp(str3)
 

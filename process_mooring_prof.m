@@ -1,11 +1,12 @@
 
-str3 = '../OOI_Data/deployment0003_GA03FLMA-RIM01-02-CTDMOG048-recovered_inst-ctdmo_ghqr_instrument_recovered_20161030T233001-20180109T120001.nc';
+
+str3 = '../OOI_Data/deployment0003_GA02HYPM-WFP02-04-CTDPFL000-recovered_wfp-ctdpf_ckl_wfp_instrument_recovered_20161030T000003-20171003T185844.999253.nc';
 
 ncdisp(str3)
 
-pres = ncread(str3,'ctdmo_seawater_pressure');
+pres = ncread(str3,'ctdpf_ckl_seawater_pressure');
 time = ncread(str3,'internal_timestamp');
-temp = ncread(str3,'ctdmo_seawater_temperature');
+temp = ncread(str3,'ctdpf_ckl_seawater_temperature');
 salt = ncread(str3,'practical_salinity');
 lat = ncread(str3,'lat');
 lon = ncread(str3,'lon');
@@ -21,14 +22,14 @@ end
 
 
 
-Obs_500_temp = [time,lat,lon+360,theta,salt];
-Obs_500_temp = sortrows(Obs_500_temp,1);
+Obs_Prof_temp = [time,lat,lon+360,theta,salt];
+Obs_Prof_temp = sortrows(Obs_Prof_temp,1);
 
 start_date = 20161130;
 
-start = find(Obs_500_temp(:,1)>start_date,1);
+start = find(Obs_Prof_temp(:,1)>start_date,1);
 
-Obs_500_temp = Obs_500_temp(start:end,:);
+Obs_Prof_temp = Obs_Prof_temp(start:end,:);
 
 
 % sample_p = pres(1:1000);
@@ -40,22 +41,15 @@ Obs_500_temp = Obs_500_temp(start:end,:);
 % figure
 % histogram(depth)
 
-Obs_500 = zeros(307,5);
+Obs_Prof = zeros(396,5);
 date = 736665;
 
 for ii=1:396
     date_n = str2double(datestr(date,'yyyymmdd'));
-    Obs_500(ii,:) = mean(Obs_500_temp(Obs_500_temp(:,1)==date_n,:),1);
+    Obs_Prof(ii,:) = mean(Obs_Prof_temp(Obs_Prof_temp(:,1)==date_n,:),1);
     date = date+1;
 end
 
-clearvars -except Obs_500
+clearvars -except Obs_Prof
 
-save Obs_500
-
-
-
-
-
-
-
+save Obs_Prof

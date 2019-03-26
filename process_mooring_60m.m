@@ -1,5 +1,5 @@
 
-str3 = '../OOI_Data/deployment0003_GA03FLMA-RIM01-02-CTDMOG048-recovered_inst-ctdmo_ghqr_instrument_recovered_20161030T233001-20180109T120001.nc';
+str3 = '../OOI_Data/deployment0003_GA03FLMA-RIM01-02-CTDMOG042-recovered_inst-ctdmo_ghqr_instrument_recovered_20161030T233001-20180109T120001.nc';
 
 ncdisp(str3)
 
@@ -21,14 +21,14 @@ end
 
 
 
-Obs_500_temp = [time,lat,lon+360,theta,salt];
-Obs_500_temp = sortrows(Obs_500_temp,1);
+Obs_60_temp = [time,lat,lon+360,theta,salt];
+Obs_60_temp = sortrows(Obs_60_temp,1);
 
 start_date = 20161130;
 
-start = find(Obs_500_temp(:,1)>start_date,1);
+start = find(Obs_60_temp(:,1)>start_date,1);
 
-Obs_500_temp = Obs_500_temp(start:end,:);
+Obs_60_temp = Obs_60_temp(start:end,:);
 
 
 % sample_p = pres(1:1000);
@@ -40,22 +40,16 @@ Obs_500_temp = Obs_500_temp(start:end,:);
 % figure
 % histogram(depth)
 
-Obs_500 = zeros(307,5);
+Obs_60 = zeros(307,5);
 date = 736665;
 
 for ii=1:396
     date_n = str2double(datestr(date,'yyyymmdd'));
-    Obs_500(ii,:) = mean(Obs_500_temp(Obs_500_temp(:,1)==date_n,:),1);
+    Obs_60(ii,:) = mean(Obs_60_temp(Obs_60_temp(:,1)==date_n,:),1);
     date = date+1;
 end
 
-clearvars -except Obs_500
+clearvars -except Obs_60
 
-save Obs_500
-
-
-
-
-
-
+save Obs_60
 

@@ -96,7 +96,7 @@ SALT_Obs_Array1b = sortrows(SALT_Obs_Array1b);
 
 [sum(double(isnan(THETA_Obs_Array1b)))',[0;0;0;depth],[1:100]',[RC;zeros(48,1)]]
 
-fl_str = '../SOCCOM/USGO_SO_2017_PFL_D.nc';
+fl_str = '../SOCCOM/USGO_WO_2017_PFL_D.nc';
 ncdisp(fl_str);
 depth = ncread(fl_str,'prof_depth');
 S = ncread(fl_str,'prof_S');
