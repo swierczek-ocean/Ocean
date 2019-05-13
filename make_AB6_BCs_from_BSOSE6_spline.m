@@ -4,25 +4,15 @@ clear
 close all
 
 
-XC = rdmds('XC');
-YC = rdmds('YC');
-XG = rdmds('XG');
-YG = rdmds('YG');
-HC = rdmds('hFacC');
-XC = XC(:,end);
-YC = YC(end,:);
-XG = XG(:,end);
-YG = YG(end,:);
+load XY6
 
-lox3 = find(XC>288.3,1);
-hix3 = find(XC>352,1);
-loy3 = find(YC>-60.1,1)-1;
-hiy3 = find(YC>-30.7,1);
-YY3 = find(YC>-32.1,1);
+HC = hFacC6;
+HS = hFacS6;
+HW = hFacW6;
 
-[XC3,YC3] = ndgrid(XC,YC);
-[XU,YU] = ndgrid(XG,YC);
-[XV,YV] = ndgrid(XC,YG);
+[XU,YU] = ndgrid(XG6,YC6);
+[XV,YV] = ndgrid(XC6,YG6);
+[XC6,YC6] = ndgrid(XC6,YC6);
 
 %% DIC
 str = '/data/SOSE/SOSE/SO6/ITER122/bsose_i122_2013to2017_monthly_DIC.nc';
@@ -32,10 +22,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -55,38 +45,38 @@ for ii=1:60
         DIC_temp(:,:,jj,ii) = DIC_temp_temp;
     end
 end
-DIC = zeros(192,132,52,61);
+DIC = zeros(384,260,52,61);
 
 for ii=1:52
     for jj=1:60
-        F = griddedInterpolant(XCS,YCS,DIC_temp(:,:,ii,jj),'linear');
-        DIC(:,:,ii,jj) = F(XC3,YC3);
+        F = griddedInterpolant(XCS,YCS,DIC_temp(:,:,ii,jj),'spline');
+        DIC(:,:,ii,jj) = F(XC6,YC6);
     end
 end
 
 num_mistakes = 0;
 for kk=1:60
     Logic = DIC(:,:,:,kk)==0&HC~=0;
-    num_mistakes = num_mistakes + sum(reshape(Logic,[192*132*52,1]));
+    num_mistakes = num_mistakes + sum(reshape(Logic,[384*260*52,1]));
 end
 fprintf('number of DIC mistakes = %g \n',num_mistakes)
 
 fprintf('DIC grid = [%g,%g]x[%g,%g] \n DIC nbc loc = %g \n',X(lox),X(hix),Y(loy),Y(hiy),Y(YY));
 
 
-DICN = DIC(lox3:hix3,YY3,:,:);
-DICS = DIC(lox3:hix3,loy3+5,:,:);
-DICE = DIC(hix3-5,loy3:hiy3,:,:);
-DICW = DIC(loy3+5,loy3:hiy3,:,:);
-for ii=1:5
-    DICN(ii,:,:,:) = DICN(6,:,:,:);
-    DICN(187+ii,:,:,:) = DICN(187,:,:,:);
-    DICS(ii,:,:,:) = DICS(6,:,:,:);
-    DICS(187+ii,:,:,:) = DICS(187,:,:,:);    
-    DICE(:,ii,:,:) = DICE(:,6,:,:);
-    DICE(:,127+ii,:,:) = DICE(:,127,:,:);
-    DICW(:,ii,:,:) = DICW(:,6,:,:);
-    DICW(:,127+ii,:,:) = DICW(:,127,:,:);
+DICN = DIC(:,250,:,:);
+DICS = DIC(:,11,:,:);
+DICE = DIC(374,:,:,:);
+DICW = DIC(11,:,:,:);
+for ii=1:10
+    DICN(ii,:,:,:) = DICN(11,:,:,:);
+    DICN(374+ii,:,:,:) = DICN(374,:,:,:);
+    DICS(ii,:,:,:) = DICS(11,:,:,:);
+    DICS(374+ii,:,:,:) = DICS(374,:,:,:);
+    DICE(:,ii,:,:) = DICE(:,11,:,:);
+    DICE(:,250+ii,:,:) = DICE(:,250,:,:);
+    DICW(:,ii,:,:) = DICW(:,11,:,:);
+    DICW(:,250+ii,:,:) = DICW(:,250,:,:);
 end
 
 DICN = squeeze(DICN);
@@ -104,19 +94,19 @@ fprintf('DICS has %g NaNs \n',sum(sum(sum(isnan(DICS)))));
 fprintf('DICE has %g NaNs \n',sum(sum(sum(isnan(DICE)))));
 fprintf('DICW has %g NaNs \n',sum(sum(sum(isnan(DICW)))));
 
-fid = fopen('DIC_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DIC_NBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,DICN,'single');
 fclose(fid);
 
-fid = fopen('DIC_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DIC_SBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,DICS,'single');
 fclose(fid);
 
-fid = fopen('DIC_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DIC_EBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,DICE,'single');
 fclose(fid);
 
-fid = fopen('DIC_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DIC_WBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,DICW,'single');
 fclose(fid);
 
@@ -132,10 +122,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -155,37 +145,37 @@ for ii=1:60
         ALK_temp(:,:,jj,ii) = ALK_temp_temp;
     end
 end
-ALK = zeros(192,132,52,61);
+ALK = zeros(384,260,52,61);
 
 fprintf('ALK grid = [%g,%g]x[%g,%g] \n ALK nbc loc = %g \n',X(lox),X(hix),Y(loy),Y(hiy),Y(YY));
 
 for ii=1:52
     for jj=1:60
-        F = griddedInterpolant(XCS,YCS,ALK_temp(:,:,ii,jj),'linear');
-        ALK(:,:,ii,jj) = F(XC3,YC3);
+        F = griddedInterpolant(XCS,YCS,ALK_temp(:,:,ii,jj),'spline');
+        ALK(:,:,ii,jj) = F(XC6,YC6);
     end
 end
 
 num_mistakes = 0;
 for kk=1:60
     Logic = ALK(:,:,:,kk)==0&HC~=0;
-    num_mistakes = num_mistakes + sum(reshape(Logic,[192*132*52,1]));
+    num_mistakes = num_mistakes + sum(reshape(Logic,[384*260*52,1]));
 end
 fprintf('number of ALK mistakes = %g \n',num_mistakes)
 
-ALKN = ALK(lox3:hix3,YY3,:,:);
-ALKS = ALK(lox3:hix3,loy3+5,:,:);
-ALKE = ALK(hix3-5,loy3:hiy3,:,:);
-ALKW = ALK(loy3+5,loy3:hiy3,:,:);
-for ii=1:5
-    ALKN(ii,:,:,:) = ALKN(6,:,:,:);
-    ALKN(187+ii,:,:,:) = ALKN(187,:,:,:);
-    ALKS(ii,:,:,:) = ALKS(6,:,:,:);
-    ALKS(187+ii,:,:,:) = ALKS(187,:,:,:);    
-    ALKE(:,ii,:,:) = ALKE(:,6,:,:);
-    ALKE(:,127+ii,:,:) = ALKE(:,127,:,:);
-    ALKW(:,ii,:,:) = ALKW(:,6,:,:);
-    ALKW(:,127+ii,:,:) = ALKW(:,127,:,:);
+ALKN = ALK(:,250,:,:);
+ALKS = ALK(:,11,:,:);
+ALKE = ALK(374,:,:,:);
+ALKW = ALK(11,:,:,:);
+for ii=1:10
+    ALKN(ii,:,:,:) = ALKN(11,:,:,:);
+    ALKN(374+ii,:,:,:) = ALKN(374,:,:,:);
+    ALKS(ii,:,:,:) = ALKS(11,:,:,:);
+    ALKS(374+ii,:,:,:) = ALKS(374,:,:,:);
+    ALKE(:,ii,:,:) = ALKE(:,11,:,:);
+    ALKE(:,250+ii,:,:) = ALKE(:,250,:,:);
+    ALKW(:,ii,:,:) = ALKW(:,11,:,:);
+    ALKW(:,250+ii,:,:) = ALKW(:,250,:,:);
 end
 
 ALKN = squeeze(ALKN);
@@ -202,19 +192,19 @@ fprintf('ALKS has %g NaNs \n',sum(sum(sum(isnan(ALKS)))));
 fprintf('ALKE has %g NaNs \n',sum(sum(sum(isnan(ALKE)))));
 fprintf('ALKW has %g NaNs \n',sum(sum(sum(isnan(ALKW)))));
 
-fid = fopen('ALK_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('ALK_NBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,ALKN,'single');
 fclose(fid);
 
-fid = fopen('ALK_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('ALK_SBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,ALKS,'single');
 fclose(fid);
 
-fid = fopen('ALK_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('ALK_EBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,ALKE,'single');
 fclose(fid);
 
-fid = fopen('ALK_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('ALK_WBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,ALKW,'single');
 fclose(fid);
 
@@ -229,10 +219,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -252,37 +242,37 @@ for ii=1:60
         O2_temp(:,:,jj,ii) = O2_temp_temp;
     end
 end
-O2 = zeros(192,132,52,61);
+O2 = zeros(384,260,52,61);
 
 fprintf('O2 grid = [%g,%g]x[%g,%g] \n O2 nbc loc = %g \n',X(lox),X(hix),Y(loy),Y(hiy),Y(YY));
 
 for ii=1:52
     for jj=1:60
-        F = griddedInterpolant(XCS,YCS,O2_temp(:,:,ii,jj),'linear');
-        O2(:,:,ii,jj) = F(XC3,YC3);
+        F = griddedInterpolant(XCS,YCS,O2_temp(:,:,ii,jj),'spline');
+        O2(:,:,ii,jj) = F(XC6,YC6);
     end
 end
 
 num_mistakes = 0;
 for kk=1:60
     Logic = O2(:,:,:,kk)==0&HC~=0;
-    num_mistakes = num_mistakes + sum(reshape(Logic,[192*132*52,1]));
+    num_mistakes = num_mistakes + sum(reshape(Logic,[384*260*52,1]));
 end
 fprintf('number of O2 mistakes = %g \n',num_mistakes)
 
-O2N = O2(lox3:hix3,YY3,:,:);
-O2S = O2(lox3:hix3,loy3+5,:,:);
-O2E = O2(hix3-5,loy3:hiy3,:,:);
-O2W = O2(loy3+5,loy3:hiy3,:,:);
-for ii=1:5
-    O2N(ii,:,:,:) = O2N(6,:,:,:);
-    O2N(187+ii,:,:,:) = O2N(187,:,:,:);
-    O2S(ii,:,:,:) = O2S(6,:,:,:);
-    O2S(187+ii,:,:,:) = O2S(187,:,:,:);    
-    O2E(:,ii,:,:) = O2E(:,6,:,:);
-    O2E(:,127+ii,:,:) = O2E(:,127,:,:);
-    O2W(:,ii,:,:) = O2W(:,6,:,:);
-    O2W(:,127+ii,:,:) = O2W(:,127,:,:);
+O2N = O2(:,250,:,:);
+O2S = O2(:,11,:,:);
+O2E = O2(374,:,:,:);
+O2W = O2(11,:,:,:);
+for ii=1:10
+    O2N(ii,:,:,:) = O2N(11,:,:,:);
+    O2N(374+ii,:,:,:) = O2N(374,:,:,:);
+    O2S(ii,:,:,:) = O2S(11,:,:,:);
+    O2S(374+ii,:,:,:) = O2S(374,:,:,:);
+    O2E(:,ii,:,:) = O2E(:,11,:,:);
+    O2E(:,250+ii,:,:) = O2E(:,250,:,:);
+    O2W(:,ii,:,:) = O2W(:,11,:,:);
+    O2W(:,250+ii,:,:) = O2W(:,250,:,:);
 end
 
 O2N = squeeze(O2N);
@@ -299,19 +289,19 @@ fprintf('O2S has %g NaNs \n',sum(sum(sum(isnan(O2S)))));
 fprintf('O2E has %g NaNs \n',sum(sum(sum(isnan(O2E)))));
 fprintf('O2W has %g NaNs \n',sum(sum(sum(isnan(O2W)))));
 
-fid = fopen('O2_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('O2_NBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,O2N,'single');
 fclose(fid);
 
-fid = fopen('O2_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('O2_SBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,O2S,'single');
 fclose(fid);
 
-fid = fopen('O2_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('O2_EBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,O2E,'single');
 fclose(fid);
 
-fid = fopen('O2_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('O2_WBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,O2W,'single');
 fclose(fid);
 
@@ -326,10 +316,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -349,37 +339,37 @@ for ii=1:60
         NO3_temp(:,:,jj,ii) = NO3_temp_temp;
     end
 end
-NO3 = zeros(192,132,52,61);
+NO3 = zeros(384,260,52,61);
 
 fprintf('NO3 grid = [%g,%g]x[%g,%g] \n NO3 nbc loc = %g \n',X(lox),X(hix),Y(loy),Y(hiy),Y(YY));
 
 for ii=1:52
     for jj=1:60
-        F = griddedInterpolant(XCS,YCS,NO3_temp(:,:,ii,jj),'linear');
-        NO3(:,:,ii,jj) = F(XC3,YC3);
+        F = griddedInterpolant(XCS,YCS,NO3_temp(:,:,ii,jj),'spline');
+        NO3(:,:,ii,jj) = F(XC6,YC6);
     end
 end
 
 num_mistakes = 0;
 for kk=1:60
     Logic = NO3(:,:,:,kk)==0&HC~=0;
-    num_mistakes = num_mistakes + sum(reshape(Logic,[192*132*52,1]));
+    num_mistakes = num_mistakes + sum(reshape(Logic,[384*260*52,1]));
 end
 fprintf('number of NO3 mistakes = %g \n',num_mistakes)
 
-NO3N = NO3(lox3:hix3,YY3,:,:);
-NO3S = NO3(lox3:hix3,loy3+5,:,:);
-NO3E = NO3(hix3-5,loy3:hiy3,:,:);
-NO3W = NO3(loy3+5,loy3:hiy3,:,:);
-for ii=1:5
-    NO3N(ii,:,:,:) = NO3N(6,:,:,:);
-    NO3N(187+ii,:,:,:) = NO3N(187,:,:,:);
-    NO3S(ii,:,:,:) = NO3S(6,:,:,:);
-    NO3S(187+ii,:,:,:) = NO3S(187,:,:,:);    
-    NO3E(:,ii,:,:) = NO3E(:,6,:,:);
-    NO3E(:,127+ii,:,:) = NO3E(:,127,:,:);
-    NO3W(:,ii,:,:) = NO3W(:,6,:,:);
-    NO3W(:,127+ii,:,:) = NO3W(:,127,:,:);
+NO3N = NO3(:,250,:,:);
+NO3S = NO3(:,11,:,:);
+NO3E = NO3(374,:,:,:);
+NO3W = NO3(11,:,:,:);
+for ii=1:10
+    NO3N(ii,:,:,:) = NO3N(11,:,:,:);
+    NO3N(374+ii,:,:,:) = NO3N(374,:,:,:);
+    NO3S(ii,:,:,:) = NO3S(11,:,:,:);
+    NO3S(374+ii,:,:,:) = NO3S(374,:,:,:);
+    NO3E(:,ii,:,:) = NO3E(:,11,:,:);
+    NO3E(:,250+ii,:,:) = NO3E(:,250,:,:);
+    NO3W(:,ii,:,:) = NO3W(:,11,:,:);
+    NO3W(:,250+ii,:,:) = NO3W(:,250,:,:);
 end
 
 NO3N = squeeze(NO3N);
@@ -396,19 +386,19 @@ fprintf('NO3S has %g NaNs \n',sum(sum(sum(isnan(NO3S)))));
 fprintf('NO3E has %g NaNs \n',sum(sum(sum(isnan(NO3E)))));
 fprintf('NO3W has %g NaNs \n',sum(sum(sum(isnan(NO3W)))));
 
-fid = fopen('NO3_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('NO3_NBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,NO3N,'single');
 fclose(fid);
 
-fid = fopen('NO3_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('NO3_SBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,NO3S,'single');
 fclose(fid);
 
-fid = fopen('NO3_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('NO3_EBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,NO3E,'single');
 fclose(fid);
 
-fid = fopen('NO3_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('NO3_WBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,NO3W,'single');
 fclose(fid);
 
@@ -423,10 +413,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -446,37 +436,37 @@ for ii=1:60
         PO4_temp(:,:,jj,ii) = PO4_temp_temp;
     end
 end
-PO4 = zeros(192,132,52,61);
+PO4 = zeros(384,260,52,61);
 
 fprintf('PO4 grid = [%g,%g]x[%g,%g] \n PO4 nbc loc = %g \n',X(lox),X(hix),Y(loy),Y(hiy),Y(YY));
 
 for ii=1:52
     for jj=1:60
-        F = griddedInterpolant(XCS,YCS,PO4_temp(:,:,ii,jj),'linear');
-        PO4(:,:,ii,jj) = F(XC3,YC3);
+        F = griddedInterpolant(XCS,YCS,PO4_temp(:,:,ii,jj),'spline');
+        PO4(:,:,ii,jj) = F(XC6,YC6);
     end
 end
 
 num_mistakes = 0;
 for kk=1:60
     Logic = PO4(:,:,:,kk)==0&HC~=0;
-    num_mistakes = num_mistakes + sum(reshape(Logic,[192*132*52,1]));
+    num_mistakes = num_mistakes + sum(reshape(Logic,[384*260*52,1]));
 end
 fprintf('number of PO4 mistakes = %g \n',num_mistakes)
 
-PO4N = PO4(lox3:hix3,YY3,:,:);
-PO4S = PO4(lox3:hix3,loy3+5,:,:);
-PO4E = PO4(hix3-5,loy3:hiy3,:,:);
-PO4W = PO4(loy3+5,loy3:hiy3,:,:);
-for ii=1:5
-    PO4N(ii,:,:,:) = PO4N(6,:,:,:);
-    PO4N(187+ii,:,:,:) = PO4N(187,:,:,:);
-    PO4S(ii,:,:,:) = PO4S(6,:,:,:);
-    PO4S(187+ii,:,:,:) = PO4S(187,:,:,:);    
-    PO4E(:,ii,:,:) = PO4E(:,6,:,:);
-    PO4E(:,127+ii,:,:) = PO4E(:,127,:,:);
-    PO4W(:,ii,:,:) = PO4W(:,6,:,:);
-    PO4W(:,127+ii,:,:) = PO4W(:,127,:,:);
+PO4N = PO4(:,250,:,:);
+PO4S = PO4(:,11,:,:);
+PO4E = PO4(374,:,:,:);
+PO4W = PO4(11,:,:,:);
+for ii=1:10
+    PO4N(ii,:,:,:) = PO4N(11,:,:,:);
+    PO4N(374+ii,:,:,:) = PO4N(374,:,:,:);
+    PO4S(ii,:,:,:) = PO4S(11,:,:,:);
+    PO4S(374+ii,:,:,:) = PO4S(374,:,:,:);
+    PO4E(:,ii,:,:) = PO4E(:,11,:,:);
+    PO4E(:,250+ii,:,:) = PO4E(:,250,:,:);
+    PO4W(:,ii,:,:) = PO4W(:,11,:,:);
+    PO4W(:,250+ii,:,:) = PO4W(:,250,:,:);
 end
 
 PO4N = squeeze(PO4N);
@@ -493,19 +483,19 @@ fprintf('PO4S has %g NaNs \n',sum(sum(sum(isnan(PO4S)))));
 fprintf('PO4E has %g NaNs \n',sum(sum(sum(isnan(PO4E)))));
 fprintf('PO4W has %g NaNs \n',sum(sum(sum(isnan(PO4W)))));
 
-fid = fopen('PO4_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('PO4_NBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,PO4N,'single');
 fclose(fid);
 
-fid = fopen('PO4_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('PO4_SBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,PO4S,'single');
 fclose(fid);
 
-fid = fopen('PO4_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('PO4_EBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,PO4E,'single');
 fclose(fid);
 
-fid = fopen('PO4_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('PO4_WBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,PO4W,'single');
 fclose(fid);
 
@@ -520,10 +510,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -543,37 +533,37 @@ for ii=1:60
         FE_temp(:,:,jj,ii) = FE_temp_temp;
     end
 end
-FE = zeros(192,132,52,61);
+FE = zeros(384,260,52,61);
 
 fprintf('FE grid = [%g,%g]x[%g,%g] \n FE nbc loc = %g \n',X(lox),X(hix),Y(loy),Y(hiy),Y(YY));
 
 for ii=1:52
     for jj=1:60
-        F = griddedInterpolant(XCS,YCS,FE_temp(:,:,ii,jj),'linear');
-        FE(:,:,ii,jj) = F(XC3,YC3);
+        F = griddedInterpolant(XCS,YCS,FE_temp(:,:,ii,jj),'spline');
+        FE(:,:,ii,jj) = F(XC6,YC6);
     end
 end
 
 num_mistakes = 0;
 for kk=1:60
     Logic = FE(:,:,:,kk)==0&HC~=0;
-    num_mistakes = num_mistakes + sum(reshape(Logic,[192*132*52,1]));
+    num_mistakes = num_mistakes + sum(reshape(Logic,[384*260*52,1]));
 end
 fprintf('number of FE mistakes = %g \n',num_mistakes)
 
-FEN = FE(lox3:hix3,YY3,:,:);
-FES = FE(lox3:hix3,loy3+5,:,:);
-FEE = FE(hix3-5,loy3:hiy3,:,:);
-FEW = FE(loy3+5,loy3:hiy3,:,:);
-for ii=1:5
-    FEN(ii,:,:,:) = FEN(6,:,:,:);
-    FEN(187+ii,:,:,:) = FEN(187,:,:,:);
-    FES(ii,:,:,:) = FES(6,:,:,:);
-    FES(187+ii,:,:,:) = FES(187,:,:,:);    
-    FEE(:,ii,:,:) = FEE(:,6,:,:);
-    FEE(:,127+ii,:,:) = FEE(:,127,:,:);
-    FEW(:,ii,:,:) = FEW(:,6,:,:);
-    FEW(:,127+ii,:,:) = FEW(:,127,:,:);
+FEN = FE(:,250,:,:);
+FES = FE(:,11,:,:);
+FEE = FE(374,:,:,:);
+FEW = FE(11,:,:,:);
+for ii=1:10
+    FEN(ii,:,:,:) = FEN(11,:,:,:);
+    FEN(374+ii,:,:,:) = FEN(374,:,:,:);
+    FES(ii,:,:,:) = FES(11,:,:,:);
+    FES(374+ii,:,:,:) = FES(374,:,:,:);
+    FEE(:,ii,:,:) = FEE(:,11,:,:);
+    FEE(:,250+ii,:,:) = FEE(:,250,:,:);
+    FEW(:,ii,:,:) = FEW(:,11,:,:);
+    FEW(:,250+ii,:,:) = FEW(:,250,:,:);
 end
 
 FEN = squeeze(FEN);
@@ -590,19 +580,19 @@ fprintf('FES has %g NaNs \n',sum(sum(sum(isnan(FES)))));
 fprintf('FEE has %g NaNs \n',sum(sum(sum(isnan(FEE)))));
 fprintf('FEW has %g NaNs \n',sum(sum(sum(isnan(FEW)))));
 
-fid = fopen('FE_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('FE_NBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,FEN,'single');
 fclose(fid);
 
-fid = fopen('FE_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('FE_SBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,FES,'single');
 fclose(fid);
 
-fid = fopen('FE_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('FE_EBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,FEE,'single');
 fclose(fid);
 
-fid = fopen('FE_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('FE_WBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,FEW,'single');
 fclose(fid);
 
@@ -617,10 +607,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -640,37 +630,37 @@ for ii=1:60
         DON_temp(:,:,jj,ii) = DON_temp_temp;
     end
 end
-DON = zeros(192,132,52,61);
+DON = zeros(384,260,52,61);
 
 fprintf('DON grid = [%g,%g]x[%g,%g] \n DON nbc loc = %g \n',X(lox),X(hix),Y(loy),Y(hiy),Y(YY));
 
 for ii=1:52
     for jj=1:60
-        F = griddedInterpolant(XCS,YCS,DON_temp(:,:,ii,jj),'linear');
-        DON(:,:,ii,jj) = F(XC3,YC3);
+        F = griddedInterpolant(XCS,YCS,DON_temp(:,:,ii,jj),'spline');
+        DON(:,:,ii,jj) = F(XC6,YC6);
     end
 end
 
 num_mistakes = 0;
 for kk=1:60
     Logic = DON(:,:,:,kk)==0&HC~=0;
-    num_mistakes = num_mistakes + sum(reshape(Logic,[192*132*52,1]));
+    num_mistakes = num_mistakes + sum(reshape(Logic,[384*260*52,1]));
 end
 fprintf('number of DON mistakes = %g \n',num_mistakes)
 
-DONN = DON(lox3:hix3,YY3,:,:);
-DONS = DON(lox3:hix3,loy3+5,:,:);
-DONE = DON(hix3-5,loy3:hiy3,:,:);
-DONW = DON(loy3+5,loy3:hiy3,:,:);
-for ii=1:5
-    DONN(ii,:,:,:) = DONN(6,:,:,:);
-    DONN(187+ii,:,:,:) = DONN(187,:,:,:);
-    DONS(ii,:,:,:) = DONS(6,:,:,:);
-    DONS(187+ii,:,:,:) = DONS(187,:,:,:);    
-    DONE(:,ii,:,:) = DONE(:,6,:,:);
-    DONE(:,127+ii,:,:) = DONE(:,127,:,:);
-    DONW(:,ii,:,:) = DONW(:,6,:,:);
-    DONW(:,127+ii,:,:) = DONW(:,127,:,:);
+DONN = DON(:,250,:,:);
+DONS = DON(:,11,:,:);
+DONE = DON(374,:,:,:);
+DONW = DON(11,:,:,:);
+for ii=1:10
+    DONN(ii,:,:,:) = DONN(11,:,:,:);
+    DONN(374+ii,:,:,:) = DONN(374,:,:,:);
+    DONS(ii,:,:,:) = DONS(11,:,:,:);
+    DONS(374+ii,:,:,:) = DONS(374,:,:,:);
+    DONE(:,ii,:,:) = DONE(:,11,:,:);
+    DONE(:,250+ii,:,:) = DONE(:,250,:,:);
+    DONW(:,ii,:,:) = DONW(:,11,:,:);
+    DONW(:,250+ii,:,:) = DONW(:,250,:,:);
 end
 
 DONN = squeeze(DONN);
@@ -687,19 +677,19 @@ fprintf('DONS has %g NaNs \n',sum(sum(sum(isnan(DONS)))));
 fprintf('DONE has %g NaNs \n',sum(sum(sum(isnan(DONE)))));
 fprintf('DONW has %g NaNs \n',sum(sum(sum(isnan(DONW)))));
 
-fid = fopen('DON_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DON_NBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,DONN,'single');
 fclose(fid);
 
-fid = fopen('DON_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DON_SBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,DONS,'single');
 fclose(fid);
 
-fid = fopen('DON_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DON_EBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,DONE,'single');
 fclose(fid);
 
-fid = fopen('DON_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DON_WBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,DONW,'single');
 fclose(fid);
 
@@ -714,10 +704,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -737,37 +727,37 @@ for ii=1:60
         DOP_temp(:,:,jj,ii) = DOP_temp_temp;
     end
 end
-DOP = zeros(192,132,52,61);
+DOP = zeros(384,260,52,61);
 
 fprintf('DOP grid = [%g,%g]x[%g,%g] \n DOP nbc loc = %g \n',X(lox),X(hix),Y(loy),Y(hiy),Y(YY));
 
 for ii=1:52
     for jj=1:60
-        F = griddedInterpolant(XCS,YCS,DOP_temp(:,:,ii,jj),'linear');
-        DOP(:,:,ii,jj) = F(XC3,YC3);
+        F = griddedInterpolant(XCS,YCS,DOP_temp(:,:,ii,jj),'spline');
+        DOP(:,:,ii,jj) = F(XC6,YC6);
     end
 end
 
 num_mistakes = 0;
 for kk=1:60
     Logic = DOP(:,:,:,kk)==0&HC~=0;
-    num_mistakes = num_mistakes + sum(reshape(Logic,[192*132*52,1]));
+    num_mistakes = num_mistakes + sum(reshape(Logic,[384*260*52,1]));
 end
 fprintf('number of DOP mistakes = %g \n',num_mistakes)
 
-DOPN = DOP(lox3:hix3,YY3,:,:);
-DOPS = DOP(lox3:hix3,loy3+5,:,:);
-DOPE = DOP(hix3-5,loy3:hiy3,:,:);
-DOPW = DOP(loy3+5,loy3:hiy3,:,:);
-for ii=1:5
-    DOPN(ii,:,:,:) = DOPN(6,:,:,:);
-    DOPN(187+ii,:,:,:) = DOPN(187,:,:,:);
-    DOPS(ii,:,:,:) = DOPS(6,:,:,:);
-    DOPS(187+ii,:,:,:) = DOPS(187,:,:,:);    
-    DOPE(:,ii,:,:) = DOPE(:,6,:,:);
-    DOPE(:,127+ii,:,:) = DOPE(:,127,:,:);
-    DOPW(:,ii,:,:) = DOPW(:,6,:,:);
-    DOPW(:,127+ii,:,:) = DOPW(:,127,:,:);
+DOPN = DOP(:,250,:,:);
+DOPS = DOP(:,11,:,:);
+DOPE = DOP(374,:,:,:);
+DOPW = DOP(11,:,:,:);
+for ii=1:10
+    DOPN(ii,:,:,:) = DOPN(11,:,:,:);
+    DOPN(374+ii,:,:,:) = DOPN(374,:,:,:);
+    DOPS(ii,:,:,:) = DOPS(11,:,:,:);
+    DOPS(374+ii,:,:,:) = DOPS(374,:,:,:);
+    DOPE(:,ii,:,:) = DOPE(:,11,:,:);
+    DOPE(:,250+ii,:,:) = DOPE(:,250,:,:);
+    DOPW(:,ii,:,:) = DOPW(:,11,:,:);
+    DOPW(:,250+ii,:,:) = DOPW(:,250,:,:);
 end
 
 DOPN = squeeze(DOPN);
@@ -784,19 +774,19 @@ fprintf('DOPS has %g NaNs \n',sum(sum(sum(isnan(DOPS)))));
 fprintf('DOPE has %g NaNs \n',sum(sum(sum(isnan(DOPE)))));
 fprintf('DOPW has %g NaNs \n',sum(sum(sum(isnan(DOPW)))));
 
-fid = fopen('DOP_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DOP_NBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,DOPN,'single');
 fclose(fid);
 
-fid = fopen('DOP_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DOP_SBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,DOPS,'single');
 fclose(fid);
 
-fid = fopen('DOP_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DOP_EBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,DOPE,'single');
 fclose(fid);
 
-fid = fopen('DOP_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DOP_WBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,DOPW,'single');
 fclose(fid);
 
@@ -811,10 +801,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -834,37 +824,37 @@ for ii=1:60
         THETA_temp(:,:,jj,ii) = THETA_temp_temp;
     end
 end
-THETA = zeros(192,132,52,61);
+THETA = zeros(384,260,52,61);
 
 fprintf('THETA grid = [%g,%g]x[%g,%g] \n DOP nbc loc = %g \n',X(lox),X(hix),Y(loy),Y(hiy),Y(YY));
 
 for ii=1:52
     for jj=1:60
-        F = griddedInterpolant(XCS,YCS,THETA_temp(:,:,ii,jj),'linear');
-        THETA(:,:,ii,jj) = F(XC3,YC3);
+        F = griddedInterpolant(XCS,YCS,THETA_temp(:,:,ii,jj),'spline');
+        THETA(:,:,ii,jj) = F(XC6,YC6);
     end
 end
 
 num_mistakes = 0;
 for kk=1:60
     Logic = THETA(:,:,:,kk)==0&HC~=0;
-    num_mistakes = num_mistakes + sum(reshape(Logic,[192*132*52,1]));
+    num_mistakes = num_mistakes + sum(reshape(Logic,[384*260*52,1]));
 end
 fprintf('number of THETA mistakes = %g \n',num_mistakes)
 
-THETAN = THETA(lox3:hix3,YY3,:,:);
-THETAS = THETA(lox3:hix3,loy3+5,:,:);
-THETAE = THETA(hix3-5,loy3:hiy3,:,:);
-THETAW = THETA(loy3+5,loy3:hiy3,:,:);
-for ii=1:5
-    THETAN(ii,:,:,:) = THETAN(6,:,:,:);
-    THETAN(187+ii,:,:,:) = THETAN(187,:,:,:);
-    THETAS(ii,:,:,:) = THETAS(6,:,:,:);
-    THETAS(187+ii,:,:,:) = THETAS(187,:,:,:);    
-    THETAE(:,ii,:,:) = THETAE(:,6,:,:);
-    THETAE(:,127+ii,:,:) = THETAE(:,127,:,:);
-    THETAW(:,ii,:,:) = THETAW(:,6,:,:);
-    THETAW(:,127+ii,:,:) = THETAW(:,127,:,:);
+THETAN = THETA(:,250,:,:);
+THETAS = THETA(:,11,:,:);
+THETAE = THETA(374,:,:,:);
+THETAW = THETA(11,:,:,:);
+for ii=1:10
+    THETAN(ii,:,:,:) = THETAN(11,:,:,:);
+    THETAN(374+ii,:,:,:) = THETAN(374,:,:,:);
+    THETAS(ii,:,:,:) = THETAS(11,:,:,:);
+    THETAS(374+ii,:,:,:) = THETAS(374,:,:,:);
+    THETAE(:,ii,:,:) = THETAE(:,11,:,:);
+    THETAE(:,250+ii,:,:) = THETAE(:,250,:,:);
+    THETAW(:,ii,:,:) = THETAW(:,11,:,:);
+    THETAW(:,250+ii,:,:) = THETAW(:,250,:,:);
 end
 
 THETAN = squeeze(THETAN);
@@ -881,19 +871,19 @@ fprintf('THETAS has %g NaNs \n',sum(sum(sum(isnan(THETAS)))));
 fprintf('THETAE has %g NaNs \n',sum(sum(sum(isnan(THETAE)))));
 fprintf('THETAW has %g NaNs \n',sum(sum(sum(isnan(THETAW)))));
 
-fid = fopen('THETA_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('THETA_NBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,THETAN,'single');
 fclose(fid);
 
-fid = fopen('THETA_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('THETA_SBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,THETAS,'single');
 fclose(fid);
 
-fid = fopen('THETA_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('THETA_EBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,THETAE,'single');
 fclose(fid);
 
-fid = fopen('THETA_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('THETA_WBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,THETAW,'single');
 fclose(fid);
 
@@ -909,10 +899,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -932,37 +922,37 @@ for ii=1:60
         SALT_temp(:,:,jj,ii) = SALT_temp_temp;
     end
 end
-SALT = zeros(192,132,52,61);
+SALT = zeros(384,260,52,61);
 
 fprintf('SALT grid = [%g,%g]x[%g,%g] \n SALT nbc loc = %g \n',X(lox),X(hix),Y(loy),Y(hiy),Y(YY));
 
 for ii=1:52
     for jj=1:60
-        F = griddedInterpolant(XCS,YCS,SALT_temp(:,:,ii,jj),'linear');
-        SALT(:,:,ii,jj) = F(XC3,YC3);
+        F = griddedInterpolant(XCS,YCS,SALT_temp(:,:,ii,jj),'spline');
+        SALT(:,:,ii,jj) = F(XC6,YC6);
     end
 end
 
 num_mistakes = 0;
 for kk=1:60
     Logic = SALT(:,:,:,kk)==0&HC~=0;
-    num_mistakes = num_mistakes + sum(reshape(Logic,[192*132*52,1]));
+    num_mistakes = num_mistakes + sum(reshape(Logic,[384*260*52,1]));
 end
 fprintf('number of SALT mistakes = %g \n',num_mistakes)
 
-SALTN = SALT(lox3:hix3,YY3,:,:);
-SALTS = SALT(lox3:hix3,loy3+5,:,:);
-SALTE = SALT(hix3-5,loy3:hiy3,:,:);
-SALTW = SALT(loy3+5,loy3:hiy3,:,:);
-for ii=1:5
-    SALTN(ii,:,:,:) = SALTN(6,:,:,:);
-    SALTN(187+ii,:,:,:) = SALTN(187,:,:,:);
-    SALTS(ii,:,:,:) = SALTS(6,:,:,:);
-    SALTS(187+ii,:,:,:) = SALTS(187,:,:,:);    
-    SALTE(:,ii,:,:) = SALTE(:,6,:,:);
-    SALTE(:,127+ii,:,:) = SALTE(:,127,:,:);
-    SALTW(:,ii,:,:) = SALTW(:,6,:,:);
-    SALTW(:,127+ii,:,:) = SALTW(:,127,:,:);
+SALTN = SALT(:,250,:,:);
+SALTS = SALT(:,11,:,:);
+SALTE = SALT(374,:,:,:);
+SALTW = SALT(11,:,:,:);
+for ii=1:10
+    SALTN(ii,:,:,:) = SALTN(11,:,:,:);
+    SALTN(374+ii,:,:,:) = SALTN(374,:,:,:);
+    SALTS(ii,:,:,:) = SALTS(11,:,:,:);
+    SALTS(374+ii,:,:,:) = SALTS(374,:,:,:);
+    SALTE(:,ii,:,:) = SALTE(:,11,:,:);
+    SALTE(:,250+ii,:,:) = SALTE(:,250,:,:);
+    SALTW(:,ii,:,:) = SALTW(:,11,:,:);
+    SALTW(:,250+ii,:,:) = SALTW(:,250,:,:);
 end
 
 SALTN = squeeze(SALTN);
@@ -979,19 +969,19 @@ fprintf('SALTS has %g NaNs \n',sum(sum(sum(isnan(SALTS)))));
 fprintf('SALTE has %g NaNs \n',sum(sum(sum(isnan(SALTE)))));
 fprintf('SALTW has %g NaNs \n',sum(sum(sum(isnan(SALTW)))));
 
-fid = fopen('SALT_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('SALT_NBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,SALTN,'single');
 fclose(fid);
 
-fid = fopen('SALT_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('SALT_SBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,SALTS,'single');
 fclose(fid);
 
-fid = fopen('SALT_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('SALT_EBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,SALTE,'single');
 fclose(fid);
 
-fid = fopen('SALT_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('SALT_WBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,SALTW,'single');
 fclose(fid);
 
@@ -1006,10 +996,10 @@ YCS = ncread(str,'YC');
 hFacW = ncread(str,'hFacW');
 % X = XCS;
 % Y = YCS;
-% lox = find(X>288.3,1)-1;
-% hix = find(X>352,1)+1;
-% loy = find(Y>-60.1,1)-1;
-% hiy = find(Y>-30.7,1)+1;
+% lox = find(X>288.3,1)-5;
+% hix = find(X>352,1)+5;
+% loy = find(Y>-60.1,1)-5;
+% hiy = find(Y>-30.7,1)+5;
 % YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -1029,13 +1019,13 @@ for ii=1:60
         UVEL_temp(:,:,jj,ii) = UVEL_temp_temp;
     end
 end
-UVEL = zeros(192,132,52,61);
+UVEL = zeros(384,260,52,61);
 
 fprintf('UVEL grid = [%g,%g]x[%g,%g] \n UVEL nbc loc = %g \n',X(lox),X(hix),Y(loy),Y(hiy),Y(YY));
 
 for ii=1:52
     for jj=1:60
-        F = griddedInterpolant(XCS,YCS,UVEL_temp(:,:,ii,jj),'linear');
+        F = griddedInterpolant(XCS,YCS,UVEL_temp(:,:,ii,jj),'spline');
         UVEL(:,:,ii,jj) = F(XU,YU);
     end
 end
@@ -1043,23 +1033,23 @@ end
 num_mistakes = 0;
 for kk=1:60
     Logic = UVEL(:,:,:,kk)==0&HC~=0;
-    num_mistakes = num_mistakes + sum(reshape(Logic,[192*132*52,1]));
+    num_mistakes = num_mistakes + sum(reshape(Logic,[384*260*52,1]));
 end
 fprintf('number of UVEL mistakes = %g \n',num_mistakes)
 
-UVELN = UVEL(lox3:hix3,YY3,:,:);
-UVELS = UVEL(lox3:hix3,loy3+5,:,:);
-UVELE = UVEL(hix3-5,loy3:hiy3,:,:);
-UVELW = UVEL(loy3+5,loy3:hiy3,:,:);
-for ii=1:5
-    UVELN(ii,:,:,:) = UVELN(6,:,:,:);
-    UVELN(187+ii,:,:,:) = UVELN(187,:,:,:);
-    UVELS(ii,:,:,:) = UVELS(6,:,:,:);
-    UVELS(187+ii,:,:,:) = UVELS(187,:,:,:);    
-    UVELE(:,ii,:,:) = UVELE(:,6,:,:);
-    UVELE(:,127+ii,:,:) = UVELE(:,127,:,:);
-    UVELW(:,ii,:,:) = UVELW(:,6,:,:);
-    UVELW(:,127+ii,:,:) = UVELW(:,127,:,:);
+UVELN = UVEL(:,250,:,:);
+UVELS = UVEL(:,11,:,:);
+UVELE = UVEL(374,:,:,:);
+UVELW = UVEL(11,:,:,:);
+for ii=1:10
+    UVELN(ii,:,:,:) = UVELN(11,:,:,:);
+    UVELN(374+ii,:,:,:) = UVELN(374,:,:,:);
+    UVELS(ii,:,:,:) = UVELS(11,:,:,:);
+    UVELS(374+ii,:,:,:) = UVELS(374,:,:,:);
+    UVELE(:,ii,:,:) = UVELE(:,11,:,:);
+    UVELE(:,250+ii,:,:) = UVELE(:,250,:,:);
+    UVELW(:,ii,:,:) = UVELW(:,11,:,:);
+    UVELW(:,250+ii,:,:) = UVELW(:,250,:,:);
 end
 
 UVELN = squeeze(UVELN);
@@ -1076,19 +1066,19 @@ fprintf('UVELS has %g NaNs \n',sum(sum(sum(isnan(UVELS)))));
 fprintf('UVELE has %g NaNs \n',sum(sum(sum(isnan(UVELE)))));
 fprintf('UVELW has %g NaNs \n',sum(sum(sum(isnan(UVELW)))));
 
-fid = fopen('UVEL_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('UVEL_NBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,UVELN,'single');
 fclose(fid);
 
-fid = fopen('UVEL_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('UVEL_SBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,UVELS,'single');
 fclose(fid);
 
-fid = fopen('UVEL_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('UVEL_EBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,UVELE,'single');
 fclose(fid);
 
-fid = fopen('UVEL_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('UVEL_WBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,UVELW,'single');
 fclose(fid);
 
@@ -1103,10 +1093,10 @@ YCS = ncread(str,'YG');
 hFacS = ncread(str,'hFacS');
 % X = XCS;
 % Y = YCS;
-% lox = find(X>288.3,1)-1;
-% hix = find(X>352,1)+1;
-% loy = find(Y>-60.1,1)-1;
-% hiy = find(Y>-30.7,1)+1;
+% lox = find(X>288.3,1)-5;
+% hix = find(X>352,1)+5;
+% loy = find(Y>-60.1,1)-5;
+% hiy = find(Y>-30.7,1)+5;
 % YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -1126,13 +1116,13 @@ for ii=1:60
         VVEL_temp(:,:,jj,ii) = VVEL_temp_temp;
     end
 end
-VVEL = zeros(192,132,52,61);
+VVEL = zeros(384,260,52,61);
 
 fprintf('VVEL grid = [%g,%g]x[%g,%g] \n VVEL nbc loc = %g \n',X(lox),X(hix),Y(loy),Y(hiy),Y(YY));
 
 for ii=1:52
     for jj=1:60
-        F = griddedInterpolant(XCS,YCS,VVEL_temp(:,:,ii,jj),'linear');
+        F = griddedInterpolant(XCS,YCS,VVEL_temp(:,:,ii,jj),'spline');
         VVEL(:,:,ii,jj) = F(XV,YV);
     end
 end
@@ -1140,23 +1130,23 @@ end
 num_mistakes = 0;
 for kk=1:60
     Logic = VVEL(:,:,:,kk)==0&HC~=0;
-    num_mistakes = num_mistakes + sum(reshape(Logic,[192*132*52,1]));
+    num_mistakes = num_mistakes + sum(reshape(Logic,[384*260*52,1]));
 end
 fprintf('number of VVEL mistakes = %g \n',num_mistakes)
 
-VVELN = VVEL(lox3:hix3,YY3,:,:);
-VVELS = VVEL(lox3:hix3,loy3+5,:,:);
-VVELE = VVEL(hix3-5,loy3:hiy3,:,:);
-VVELW = VVEL(loy3+5,loy3:hiy3,:,:);
-for ii=1:5
-    VVELN(ii,:,:,:) = VVELN(6,:,:,:);
-    VVELN(187+ii,:,:,:) = VVELN(187,:,:,:);
-    VVELS(ii,:,:,:) = VVELS(6,:,:,:);
-    VVELS(187+ii,:,:,:) = VVELS(187,:,:,:);    
-    VVELE(:,ii,:,:) = VVELE(:,6,:,:);
-    VVELE(:,127+ii,:,:) = VVELE(:,127,:,:);
-    VVELW(:,ii,:,:) = VVELW(:,6,:,:);
-    VVELW(:,127+ii,:,:) = VVELW(:,127,:,:);
+VVELN = VVEL(:,250,:,:);
+VVELS = VVEL(:,11,:,:);
+VVELE = VVEL(374,:,:,:);
+VVELW = VVEL(11,:,:,:);
+for ii=1:10
+    VVELN(ii,:,:,:) = VVELN(11,:,:,:);
+    VVELN(374+ii,:,:,:) = VVELN(374,:,:,:);
+    VVELS(ii,:,:,:) = VVELS(11,:,:,:);
+    VVELS(374+ii,:,:,:) = VVELS(374,:,:,:);
+    VVELE(:,ii,:,:) = VVELE(:,11,:,:);
+    VVELE(:,250+ii,:,:) = VVELE(:,250,:,:);
+    VVELW(:,ii,:,:) = VVELW(:,11,:,:);
+    VVELW(:,250+ii,:,:) = VVELW(:,250,:,:);
 end
 
 VVELN = squeeze(VVELN);
@@ -1173,19 +1163,19 @@ fprintf('VVELS has %g NaNs \n',sum(sum(sum(isnan(VVELS)))));
 fprintf('VVELE has %g NaNs \n',sum(sum(sum(isnan(VVELE)))));
 fprintf('VVELW has %g NaNs \n',sum(sum(sum(isnan(VVELW)))));
 
-fid = fopen('VVEL_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('VVEL_NBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,VVELN,'single');
 fclose(fid);
 
-fid = fopen('VVEL_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('VVEL_SBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,VVELS,'single');
 fclose(fid);
 
-fid = fopen('VVEL_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('VVEL_EBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,VVELE,'single');
 fclose(fid);
 
-fid = fopen('VVEL_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('VVEL_WBC_2013to2017_monthly_6.bin','w','b');
 fwrite(fid,VVELW,'single');
 fclose(fid);
 

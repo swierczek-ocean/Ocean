@@ -81,18 +81,23 @@ Bath(end-top:end,end-right:end) = ...
 
 
 figure()
-set(gcf, 'Position', [1, 1, 1500, 800])
+set(gcf, 'Position', [1, 1, 1600, 900])
 colormap(flipud(bone))
 s = surf(X,Y,Bath);
 s.EdgeColor = 'none';
 axis([288.5 352.167 -61 -29.7 -10000 3000])
-c = colorbar('eastoutside');
-c.Label.String = 'm';
+% c = colorbar('eastoutside');
+% c.Label.String = 'm';
 caxis([lb ub])
-xlabel('Latitude')
-ylabel('Longitude')
-zlabel('Depth')
-title('Modified Argentine Basin Bathymetry in [288,352] E x [-59,-30] S')
+xtickformat('degrees')
+ytickformat('degrees')
+zticks([-6000 -4000 -2000 0])
+% axis([280 360 -70 -30 -15000 6000])
+% xlabel('Latitude')
+% ylabel('Longitude')
+% zlabel('Depth')
+title('Modified Argentine Basin Bathymetry in [288,352] E x [-59,-30] S','FontWeight','Normal')
+acc_movie
 print('Mod_Argentine_Basin_bathymetry_surf_r','-djpeg')
 
 

@@ -4,25 +4,15 @@ clear
 close all
 
 
-XC = rdmds('XC');
-YC = rdmds('YC');
-XG = rdmds('XG');
-YG = rdmds('YG');
-HC = rdmds('hFacC');
-XC = XC(:,end);
-YC = YC(end,:);
-XG = XG(:,end);
-YG = YG(end,:);
+load XY3
 
-lox3 = find(XC>288.3,1);
-hix3 = find(XC>352,1);
-loy3 = find(YC>-60.1,1)-1;
-hiy3 = find(YC>-30.7,1);
-YY3 = find(YC>-32.1,1);
+HC = hFacC3;
+HS = hFacS3;
+HW = hFacW3;
 
-[XC3,YC3] = ndgrid(XC,YC);
-[XU,YU] = ndgrid(XG,YC);
-[XV,YV] = ndgrid(XC,YG);
+[XU,YU] = ndgrid(XG3,YC3);
+[XV,YV] = ndgrid(XC3,YG3);
+[XC3,YC3] = ndgrid(XC3,YC3);
 
 %% DIC
 str = '/data/SOSE/SOSE/SO6/ITER122/bsose_i122_2013to2017_monthly_DIC.nc';
@@ -32,10 +22,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -74,15 +64,15 @@ fprintf('number of DIC mistakes = %g \n',num_mistakes)
 fprintf('DIC grid = [%g,%g]x[%g,%g] \n DIC nbc loc = %g \n',X(lox),X(hix),Y(loy),Y(hiy),Y(YY));
 
 
-DICN = DIC(lox3:hix3,YY3,:,:);
-DICS = DIC(lox3:hix3,loy3+5,:,:);
-DICE = DIC(hix3-5,loy3:hiy3,:,:);
-DICW = DIC(loy3+5,loy3:hiy3,:,:);
+DICN = DIC(:,127,:,:);
+DICS = DIC(:,6,:,:);
+DICE = DIC(187,:,:,:);
+DICW = DIC(6,:,:,:);
 for ii=1:5
     DICN(ii,:,:,:) = DICN(6,:,:,:);
     DICN(187+ii,:,:,:) = DICN(187,:,:,:);
     DICS(ii,:,:,:) = DICS(6,:,:,:);
-    DICS(187+ii,:,:,:) = DICS(187,:,:,:);    
+    DICS(187+ii,:,:,:) = DICS(187,:,:,:);
     DICE(:,ii,:,:) = DICE(:,6,:,:);
     DICE(:,127+ii,:,:) = DICE(:,127,:,:);
     DICW(:,ii,:,:) = DICW(:,6,:,:);
@@ -104,19 +94,19 @@ fprintf('DICS has %g NaNs \n',sum(sum(sum(isnan(DICS)))));
 fprintf('DICE has %g NaNs \n',sum(sum(sum(isnan(DICE)))));
 fprintf('DICW has %g NaNs \n',sum(sum(sum(isnan(DICW)))));
 
-fid = fopen('DIC_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DIC_NBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,DICN,'single');
 fclose(fid);
 
-fid = fopen('DIC_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DIC_SBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,DICS,'single');
 fclose(fid);
 
-fid = fopen('DIC_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DIC_EBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,DICE,'single');
 fclose(fid);
 
-fid = fopen('DIC_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DIC_WBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,DICW,'single');
 fclose(fid);
 
@@ -132,10 +122,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -173,15 +163,15 @@ for kk=1:60
 end
 fprintf('number of ALK mistakes = %g \n',num_mistakes)
 
-ALKN = ALK(lox3:hix3,YY3,:,:);
-ALKS = ALK(lox3:hix3,loy3+5,:,:);
-ALKE = ALK(hix3-5,loy3:hiy3,:,:);
-ALKW = ALK(loy3+5,loy3:hiy3,:,:);
+ALKN = ALK(:,127,:,:);
+ALKS = ALK(:,6,:,:);
+ALKE = ALK(187,:,:,:);
+ALKW = ALK(6,:,:,:);
 for ii=1:5
     ALKN(ii,:,:,:) = ALKN(6,:,:,:);
     ALKN(187+ii,:,:,:) = ALKN(187,:,:,:);
     ALKS(ii,:,:,:) = ALKS(6,:,:,:);
-    ALKS(187+ii,:,:,:) = ALKS(187,:,:,:);    
+    ALKS(187+ii,:,:,:) = ALKS(187,:,:,:);
     ALKE(:,ii,:,:) = ALKE(:,6,:,:);
     ALKE(:,127+ii,:,:) = ALKE(:,127,:,:);
     ALKW(:,ii,:,:) = ALKW(:,6,:,:);
@@ -202,19 +192,19 @@ fprintf('ALKS has %g NaNs \n',sum(sum(sum(isnan(ALKS)))));
 fprintf('ALKE has %g NaNs \n',sum(sum(sum(isnan(ALKE)))));
 fprintf('ALKW has %g NaNs \n',sum(sum(sum(isnan(ALKW)))));
 
-fid = fopen('ALK_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('ALK_NBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,ALKN,'single');
 fclose(fid);
 
-fid = fopen('ALK_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('ALK_SBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,ALKS,'single');
 fclose(fid);
 
-fid = fopen('ALK_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('ALK_EBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,ALKE,'single');
 fclose(fid);
 
-fid = fopen('ALK_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('ALK_WBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,ALKW,'single');
 fclose(fid);
 
@@ -229,10 +219,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -270,15 +260,15 @@ for kk=1:60
 end
 fprintf('number of O2 mistakes = %g \n',num_mistakes)
 
-O2N = O2(lox3:hix3,YY3,:,:);
-O2S = O2(lox3:hix3,loy3+5,:,:);
-O2E = O2(hix3-5,loy3:hiy3,:,:);
-O2W = O2(loy3+5,loy3:hiy3,:,:);
+O2N = O2(:,127,:,:);
+O2S = O2(:,6,:,:);
+O2E = O2(187,:,:,:);
+O2W = O2(6,:,:,:);
 for ii=1:5
     O2N(ii,:,:,:) = O2N(6,:,:,:);
     O2N(187+ii,:,:,:) = O2N(187,:,:,:);
     O2S(ii,:,:,:) = O2S(6,:,:,:);
-    O2S(187+ii,:,:,:) = O2S(187,:,:,:);    
+    O2S(187+ii,:,:,:) = O2S(187,:,:,:);
     O2E(:,ii,:,:) = O2E(:,6,:,:);
     O2E(:,127+ii,:,:) = O2E(:,127,:,:);
     O2W(:,ii,:,:) = O2W(:,6,:,:);
@@ -299,19 +289,19 @@ fprintf('O2S has %g NaNs \n',sum(sum(sum(isnan(O2S)))));
 fprintf('O2E has %g NaNs \n',sum(sum(sum(isnan(O2E)))));
 fprintf('O2W has %g NaNs \n',sum(sum(sum(isnan(O2W)))));
 
-fid = fopen('O2_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('O2_NBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,O2N,'single');
 fclose(fid);
 
-fid = fopen('O2_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('O2_SBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,O2S,'single');
 fclose(fid);
 
-fid = fopen('O2_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('O2_EBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,O2E,'single');
 fclose(fid);
 
-fid = fopen('O2_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('O2_WBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,O2W,'single');
 fclose(fid);
 
@@ -326,10 +316,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -367,15 +357,15 @@ for kk=1:60
 end
 fprintf('number of NO3 mistakes = %g \n',num_mistakes)
 
-NO3N = NO3(lox3:hix3,YY3,:,:);
-NO3S = NO3(lox3:hix3,loy3+5,:,:);
-NO3E = NO3(hix3-5,loy3:hiy3,:,:);
-NO3W = NO3(loy3+5,loy3:hiy3,:,:);
+NO3N = NO3(:,127,:,:);
+NO3S = NO3(:,6,:,:);
+NO3E = NO3(187,:,:,:);
+NO3W = NO3(6,:,:,:);
 for ii=1:5
     NO3N(ii,:,:,:) = NO3N(6,:,:,:);
     NO3N(187+ii,:,:,:) = NO3N(187,:,:,:);
     NO3S(ii,:,:,:) = NO3S(6,:,:,:);
-    NO3S(187+ii,:,:,:) = NO3S(187,:,:,:);    
+    NO3S(187+ii,:,:,:) = NO3S(187,:,:,:);
     NO3E(:,ii,:,:) = NO3E(:,6,:,:);
     NO3E(:,127+ii,:,:) = NO3E(:,127,:,:);
     NO3W(:,ii,:,:) = NO3W(:,6,:,:);
@@ -396,19 +386,19 @@ fprintf('NO3S has %g NaNs \n',sum(sum(sum(isnan(NO3S)))));
 fprintf('NO3E has %g NaNs \n',sum(sum(sum(isnan(NO3E)))));
 fprintf('NO3W has %g NaNs \n',sum(sum(sum(isnan(NO3W)))));
 
-fid = fopen('NO3_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('NO3_NBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,NO3N,'single');
 fclose(fid);
 
-fid = fopen('NO3_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('NO3_SBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,NO3S,'single');
 fclose(fid);
 
-fid = fopen('NO3_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('NO3_EBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,NO3E,'single');
 fclose(fid);
 
-fid = fopen('NO3_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('NO3_WBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,NO3W,'single');
 fclose(fid);
 
@@ -423,10 +413,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -464,15 +454,15 @@ for kk=1:60
 end
 fprintf('number of PO4 mistakes = %g \n',num_mistakes)
 
-PO4N = PO4(lox3:hix3,YY3,:,:);
-PO4S = PO4(lox3:hix3,loy3+5,:,:);
-PO4E = PO4(hix3-5,loy3:hiy3,:,:);
-PO4W = PO4(loy3+5,loy3:hiy3,:,:);
+PO4N = PO4(:,127,:,:);
+PO4S = PO4(:,6,:,:);
+PO4E = PO4(187,:,:,:);
+PO4W = PO4(6,:,:,:);
 for ii=1:5
     PO4N(ii,:,:,:) = PO4N(6,:,:,:);
     PO4N(187+ii,:,:,:) = PO4N(187,:,:,:);
     PO4S(ii,:,:,:) = PO4S(6,:,:,:);
-    PO4S(187+ii,:,:,:) = PO4S(187,:,:,:);    
+    PO4S(187+ii,:,:,:) = PO4S(187,:,:,:);
     PO4E(:,ii,:,:) = PO4E(:,6,:,:);
     PO4E(:,127+ii,:,:) = PO4E(:,127,:,:);
     PO4W(:,ii,:,:) = PO4W(:,6,:,:);
@@ -493,19 +483,19 @@ fprintf('PO4S has %g NaNs \n',sum(sum(sum(isnan(PO4S)))));
 fprintf('PO4E has %g NaNs \n',sum(sum(sum(isnan(PO4E)))));
 fprintf('PO4W has %g NaNs \n',sum(sum(sum(isnan(PO4W)))));
 
-fid = fopen('PO4_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('PO4_NBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,PO4N,'single');
 fclose(fid);
 
-fid = fopen('PO4_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('PO4_SBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,PO4S,'single');
 fclose(fid);
 
-fid = fopen('PO4_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('PO4_EBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,PO4E,'single');
 fclose(fid);
 
-fid = fopen('PO4_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('PO4_WBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,PO4W,'single');
 fclose(fid);
 
@@ -520,10 +510,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -561,15 +551,15 @@ for kk=1:60
 end
 fprintf('number of FE mistakes = %g \n',num_mistakes)
 
-FEN = FE(lox3:hix3,YY3,:,:);
-FES = FE(lox3:hix3,loy3+5,:,:);
-FEE = FE(hix3-5,loy3:hiy3,:,:);
-FEW = FE(loy3+5,loy3:hiy3,:,:);
+FEN = FE(:,127,:,:);
+FES = FE(:,6,:,:);
+FEE = FE(187,:,:,:);
+FEW = FE(6,:,:,:);
 for ii=1:5
     FEN(ii,:,:,:) = FEN(6,:,:,:);
     FEN(187+ii,:,:,:) = FEN(187,:,:,:);
     FES(ii,:,:,:) = FES(6,:,:,:);
-    FES(187+ii,:,:,:) = FES(187,:,:,:);    
+    FES(187+ii,:,:,:) = FES(187,:,:,:);
     FEE(:,ii,:,:) = FEE(:,6,:,:);
     FEE(:,127+ii,:,:) = FEE(:,127,:,:);
     FEW(:,ii,:,:) = FEW(:,6,:,:);
@@ -590,19 +580,19 @@ fprintf('FES has %g NaNs \n',sum(sum(sum(isnan(FES)))));
 fprintf('FEE has %g NaNs \n',sum(sum(sum(isnan(FEE)))));
 fprintf('FEW has %g NaNs \n',sum(sum(sum(isnan(FEW)))));
 
-fid = fopen('FE_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('FE_NBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,FEN,'single');
 fclose(fid);
 
-fid = fopen('FE_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('FE_SBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,FES,'single');
 fclose(fid);
 
-fid = fopen('FE_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('FE_EBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,FEE,'single');
 fclose(fid);
 
-fid = fopen('FE_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('FE_WBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,FEW,'single');
 fclose(fid);
 
@@ -617,10 +607,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -658,15 +648,15 @@ for kk=1:60
 end
 fprintf('number of DON mistakes = %g \n',num_mistakes)
 
-DONN = DON(lox3:hix3,YY3,:,:);
-DONS = DON(lox3:hix3,loy3+5,:,:);
-DONE = DON(hix3-5,loy3:hiy3,:,:);
-DONW = DON(loy3+5,loy3:hiy3,:,:);
+DONN = DON(:,127,:,:);
+DONS = DON(:,6,:,:);
+DONE = DON(187,:,:,:);
+DONW = DON(6,:,:,:);
 for ii=1:5
     DONN(ii,:,:,:) = DONN(6,:,:,:);
     DONN(187+ii,:,:,:) = DONN(187,:,:,:);
     DONS(ii,:,:,:) = DONS(6,:,:,:);
-    DONS(187+ii,:,:,:) = DONS(187,:,:,:);    
+    DONS(187+ii,:,:,:) = DONS(187,:,:,:);
     DONE(:,ii,:,:) = DONE(:,6,:,:);
     DONE(:,127+ii,:,:) = DONE(:,127,:,:);
     DONW(:,ii,:,:) = DONW(:,6,:,:);
@@ -687,19 +677,19 @@ fprintf('DONS has %g NaNs \n',sum(sum(sum(isnan(DONS)))));
 fprintf('DONE has %g NaNs \n',sum(sum(sum(isnan(DONE)))));
 fprintf('DONW has %g NaNs \n',sum(sum(sum(isnan(DONW)))));
 
-fid = fopen('DON_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DON_NBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,DONN,'single');
 fclose(fid);
 
-fid = fopen('DON_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DON_SBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,DONS,'single');
 fclose(fid);
 
-fid = fopen('DON_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DON_EBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,DONE,'single');
 fclose(fid);
 
-fid = fopen('DON_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DON_WBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,DONW,'single');
 fclose(fid);
 
@@ -714,10 +704,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -755,15 +745,15 @@ for kk=1:60
 end
 fprintf('number of DOP mistakes = %g \n',num_mistakes)
 
-DOPN = DOP(lox3:hix3,YY3,:,:);
-DOPS = DOP(lox3:hix3,loy3+5,:,:);
-DOPE = DOP(hix3-5,loy3:hiy3,:,:);
-DOPW = DOP(loy3+5,loy3:hiy3,:,:);
+DOPN = DOP(:,127,:,:);
+DOPS = DOP(:,6,:,:);
+DOPE = DOP(187,:,:,:);
+DOPW = DOP(6,:,:,:);
 for ii=1:5
     DOPN(ii,:,:,:) = DOPN(6,:,:,:);
     DOPN(187+ii,:,:,:) = DOPN(187,:,:,:);
     DOPS(ii,:,:,:) = DOPS(6,:,:,:);
-    DOPS(187+ii,:,:,:) = DOPS(187,:,:,:);    
+    DOPS(187+ii,:,:,:) = DOPS(187,:,:,:);
     DOPE(:,ii,:,:) = DOPE(:,6,:,:);
     DOPE(:,127+ii,:,:) = DOPE(:,127,:,:);
     DOPW(:,ii,:,:) = DOPW(:,6,:,:);
@@ -784,19 +774,19 @@ fprintf('DOPS has %g NaNs \n',sum(sum(sum(isnan(DOPS)))));
 fprintf('DOPE has %g NaNs \n',sum(sum(sum(isnan(DOPE)))));
 fprintf('DOPW has %g NaNs \n',sum(sum(sum(isnan(DOPW)))));
 
-fid = fopen('DOP_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DOP_NBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,DOPN,'single');
 fclose(fid);
 
-fid = fopen('DOP_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DOP_SBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,DOPS,'single');
 fclose(fid);
 
-fid = fopen('DOP_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DOP_EBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,DOPE,'single');
 fclose(fid);
 
-fid = fopen('DOP_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('DOP_WBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,DOPW,'single');
 fclose(fid);
 
@@ -811,10 +801,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -852,15 +842,15 @@ for kk=1:60
 end
 fprintf('number of THETA mistakes = %g \n',num_mistakes)
 
-THETAN = THETA(lox3:hix3,YY3,:,:);
-THETAS = THETA(lox3:hix3,loy3+5,:,:);
-THETAE = THETA(hix3-5,loy3:hiy3,:,:);
-THETAW = THETA(loy3+5,loy3:hiy3,:,:);
+THETAN = THETA(:,127,:,:);
+THETAS = THETA(:,6,:,:);
+THETAE = THETA(187,:,:,:);
+THETAW = THETA(6,:,:,:);
 for ii=1:5
     THETAN(ii,:,:,:) = THETAN(6,:,:,:);
     THETAN(187+ii,:,:,:) = THETAN(187,:,:,:);
     THETAS(ii,:,:,:) = THETAS(6,:,:,:);
-    THETAS(187+ii,:,:,:) = THETAS(187,:,:,:);    
+    THETAS(187+ii,:,:,:) = THETAS(187,:,:,:);
     THETAE(:,ii,:,:) = THETAE(:,6,:,:);
     THETAE(:,127+ii,:,:) = THETAE(:,127,:,:);
     THETAW(:,ii,:,:) = THETAW(:,6,:,:);
@@ -881,19 +871,19 @@ fprintf('THETAS has %g NaNs \n',sum(sum(sum(isnan(THETAS)))));
 fprintf('THETAE has %g NaNs \n',sum(sum(sum(isnan(THETAE)))));
 fprintf('THETAW has %g NaNs \n',sum(sum(sum(isnan(THETAW)))));
 
-fid = fopen('THETA_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('THETA_NBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,THETAN,'single');
 fclose(fid);
 
-fid = fopen('THETA_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('THETA_SBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,THETAS,'single');
 fclose(fid);
 
-fid = fopen('THETA_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('THETA_EBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,THETAE,'single');
 fclose(fid);
 
-fid = fopen('THETA_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('THETA_WBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,THETAW,'single');
 fclose(fid);
 
@@ -909,10 +899,10 @@ YCS = ncread(str,'YC');
 hFacC = ncread(str,'hFacC');
 X = XCS;
 Y = YCS;
-lox = find(X>288.3,1)-1;
-hix = find(X>352,1)+1;
-loy = find(Y>-60.1,1)-1;
-hiy = find(Y>-30.7,1)+1;
+lox = find(X>288.3,1)-5;
+hix = find(X>352,1)+5;
+loy = find(Y>-60.1,1)-5;
+hiy = find(Y>-30.7,1)+5;
 YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -950,15 +940,15 @@ for kk=1:60
 end
 fprintf('number of SALT mistakes = %g \n',num_mistakes)
 
-SALTN = SALT(lox3:hix3,YY3,:,:);
-SALTS = SALT(lox3:hix3,loy3+5,:,:);
-SALTE = SALT(hix3-5,loy3:hiy3,:,:);
-SALTW = SALT(loy3+5,loy3:hiy3,:,:);
+SALTN = SALT(:,127,:,:);
+SALTS = SALT(:,6,:,:);
+SALTE = SALT(187,:,:,:);
+SALTW = SALT(6,:,:,:);
 for ii=1:5
     SALTN(ii,:,:,:) = SALTN(6,:,:,:);
     SALTN(187+ii,:,:,:) = SALTN(187,:,:,:);
     SALTS(ii,:,:,:) = SALTS(6,:,:,:);
-    SALTS(187+ii,:,:,:) = SALTS(187,:,:,:);    
+    SALTS(187+ii,:,:,:) = SALTS(187,:,:,:);
     SALTE(:,ii,:,:) = SALTE(:,6,:,:);
     SALTE(:,127+ii,:,:) = SALTE(:,127,:,:);
     SALTW(:,ii,:,:) = SALTW(:,6,:,:);
@@ -979,19 +969,19 @@ fprintf('SALTS has %g NaNs \n',sum(sum(sum(isnan(SALTS)))));
 fprintf('SALTE has %g NaNs \n',sum(sum(sum(isnan(SALTE)))));
 fprintf('SALTW has %g NaNs \n',sum(sum(sum(isnan(SALTW)))));
 
-fid = fopen('SALT_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('SALT_NBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,SALTN,'single');
 fclose(fid);
 
-fid = fopen('SALT_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('SALT_SBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,SALTS,'single');
 fclose(fid);
 
-fid = fopen('SALT_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('SALT_EBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,SALTE,'single');
 fclose(fid);
 
-fid = fopen('SALT_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('SALT_WBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,SALTW,'single');
 fclose(fid);
 
@@ -1006,10 +996,10 @@ YCS = ncread(str,'YC');
 hFacW = ncread(str,'hFacW');
 % X = XCS;
 % Y = YCS;
-% lox = find(X>288.3,1)-1;
-% hix = find(X>352,1)+1;
-% loy = find(Y>-60.1,1)-1;
-% hiy = find(Y>-30.7,1)+1;
+% lox = find(X>288.3,1)-5;
+% hix = find(X>352,1)+5;
+% loy = find(Y>-60.1,1)-5;
+% hiy = find(Y>-30.7,1)+5;
 % YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -1047,15 +1037,15 @@ for kk=1:60
 end
 fprintf('number of UVEL mistakes = %g \n',num_mistakes)
 
-UVELN = UVEL(lox3:hix3,YY3,:,:);
-UVELS = UVEL(lox3:hix3,loy3+5,:,:);
-UVELE = UVEL(hix3-5,loy3:hiy3,:,:);
-UVELW = UVEL(loy3+5,loy3:hiy3,:,:);
+UVELN = UVEL(:,127,:,:);
+UVELS = UVEL(:,6,:,:);
+UVELE = UVEL(187,:,:,:);
+UVELW = UVEL(6,:,:,:);
 for ii=1:5
     UVELN(ii,:,:,:) = UVELN(6,:,:,:);
     UVELN(187+ii,:,:,:) = UVELN(187,:,:,:);
     UVELS(ii,:,:,:) = UVELS(6,:,:,:);
-    UVELS(187+ii,:,:,:) = UVELS(187,:,:,:);    
+    UVELS(187+ii,:,:,:) = UVELS(187,:,:,:);
     UVELE(:,ii,:,:) = UVELE(:,6,:,:);
     UVELE(:,127+ii,:,:) = UVELE(:,127,:,:);
     UVELW(:,ii,:,:) = UVELW(:,6,:,:);
@@ -1076,19 +1066,19 @@ fprintf('UVELS has %g NaNs \n',sum(sum(sum(isnan(UVELS)))));
 fprintf('UVELE has %g NaNs \n',sum(sum(sum(isnan(UVELE)))));
 fprintf('UVELW has %g NaNs \n',sum(sum(sum(isnan(UVELW)))));
 
-fid = fopen('UVEL_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('UVEL_NBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,UVELN,'single');
 fclose(fid);
 
-fid = fopen('UVEL_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('UVEL_SBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,UVELS,'single');
 fclose(fid);
 
-fid = fopen('UVEL_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('UVEL_EBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,UVELE,'single');
 fclose(fid);
 
-fid = fopen('UVEL_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('UVEL_WBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,UVELW,'single');
 fclose(fid);
 
@@ -1103,10 +1093,10 @@ YCS = ncread(str,'YG');
 hFacS = ncread(str,'hFacS');
 % X = XCS;
 % Y = YCS;
-% lox = find(X>288.3,1)-1;
-% hix = find(X>352,1)+1;
-% loy = find(Y>-60.1,1)-1;
-% hiy = find(Y>-30.7,1)+1;
+% lox = find(X>288.3,1)-5;
+% hix = find(X>352,1)+5;
+% loy = find(Y>-60.1,1)-5;
+% hiy = find(Y>-30.7,1)+5;
 % YY = find(Y>-32.1,1);
 XCS = XCS(lox:hix);
 YCS = YCS(loy:hiy);
@@ -1144,15 +1134,15 @@ for kk=1:60
 end
 fprintf('number of VVEL mistakes = %g \n',num_mistakes)
 
-VVELN = VVEL(lox3:hix3,YY3,:,:);
-VVELS = VVEL(lox3:hix3,loy3+5,:,:);
-VVELE = VVEL(hix3-5,loy3:hiy3,:,:);
-VVELW = VVEL(loy3+5,loy3:hiy3,:,:);
+VVELN = VVEL(:,127,:,:);
+VVELS = VVEL(:,6,:,:);
+VVELE = VVEL(187,:,:,:);
+VVELW = VVEL(6,:,:,:);
 for ii=1:5
     VVELN(ii,:,:,:) = VVELN(6,:,:,:);
     VVELN(187+ii,:,:,:) = VVELN(187,:,:,:);
     VVELS(ii,:,:,:) = VVELS(6,:,:,:);
-    VVELS(187+ii,:,:,:) = VVELS(187,:,:,:);    
+    VVELS(187+ii,:,:,:) = VVELS(187,:,:,:);
     VVELE(:,ii,:,:) = VVELE(:,6,:,:);
     VVELE(:,127+ii,:,:) = VVELE(:,127,:,:);
     VVELW(:,ii,:,:) = VVELW(:,6,:,:);
@@ -1173,19 +1163,19 @@ fprintf('VVELS has %g NaNs \n',sum(sum(sum(isnan(VVELS)))));
 fprintf('VVELE has %g NaNs \n',sum(sum(sum(isnan(VVELE)))));
 fprintf('VVELW has %g NaNs \n',sum(sum(sum(isnan(VVELW)))));
 
-fid = fopen('VVEL_NBC_2013to2017_monthly.bin','w','b');
+fid = fopen('VVEL_NBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,VVELN,'single');
 fclose(fid);
 
-fid = fopen('VVEL_SBC_2013to2017_monthly.bin','w','b');
+fid = fopen('VVEL_SBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,VVELS,'single');
 fclose(fid);
 
-fid = fopen('VVEL_EBC_2013to2017_monthly.bin','w','b');
+fid = fopen('VVEL_EBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,VVELE,'single');
 fclose(fid);
 
-fid = fopen('VVEL_WBC_2013to2017_monthly.bin','w','b');
+fid = fopen('VVEL_WBC_2013to2017_monthly_3.bin','w','b');
 fwrite(fid,VVELW,'single');
 fclose(fid);
 

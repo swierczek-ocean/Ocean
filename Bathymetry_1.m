@@ -1,6 +1,7 @@
 tic()
 clc
 clear
+close all
 
 lb = -6000;
 ub = 0;
@@ -45,14 +46,15 @@ line([350 350],[-59 -32],'Color',Color(:,cc),'LineWidth',lw)
 line([290 350],[-32 -32],'Color',Color(:,cc),'LineWidth',lw)
 line([290 350],[-59 -59],'Color',Color(:,cc),'LineWidth',lw)
 c = colorbar('eastoutside');
-c.Label.String = 'm';
+xtickformat('degrees')
+ytickformat('degrees')
 caxis([lb ub])
-xlabel('Latitude')
-ylabel('Longitude')
 zlabel('Depth')
-title('Southern Hemisphere Ocean Bathymetry')
-print('southern_hemisphere_ocean_bathymetry','-djpeg')
+title('Southern Hemisphere Ocean Bathymetry','FontWeight','Normal')
+acc_plots
+acc_movie
 hold off
+print('southern_hemisphere_ocean_bathymetry','-djpeg')
 
 
 lox = find(X>290,1);
@@ -66,12 +68,13 @@ colormap(bone)
 [C,h] = contourf(X(lox:hix),Y(loy:hiy),Bath(loy:hiy,lox:hix),z);
 clabel(C,h,v)
 c = colorbar('eastoutside');
-c.Label.String = 'm';
 caxis([lb ub])
 xlabel('Latitude')
 ylabel('Longitude')
 zlabel('Depth')
-title('Argentine Basin Bathymetry in [-70,-10] E x [-59,-32] S')
+title('Argentine Basin Bathymetry in [70,10] W x [59,32] S','FontWeight','Normal')
+acc_plots
+acc_movie
 print('Argentine_Basin_bathymetry_window_small','-djpeg')
 
 
@@ -80,14 +83,17 @@ set(gcf, 'Position', [25, 25, 1600, 900])
 colormap(flipud(bone))
 s = surf(X(lox:hix),Y(loy:hiy),Bath(loy:hiy,lox:hix));
 s.EdgeColor = 'none';
-axis([290 350 -59 -32 -10000 3000])
+axis([280 360 -70 -30 -15000 6000])
 c = colorbar('eastoutside');
-c.Label.String = 'm';
+xtickformat('degrees')
+ytickformat('degrees')
 caxis([lb ub])
 xlabel('Latitude')
 ylabel('Longitude')
 zlabel('Depth')
-title('Argentine Basin Bathymetry in [-70,-10] E x [-59,-32] S')
+title('Argentine Basin Bathymetry in [70,10] W x [59,32] S','FontWeight','Normal')
+acc_plots
+acc_movie
 print('Argentine_Basin_bathymetry_window_small_surf','-djpeg')
 
 
@@ -108,14 +114,15 @@ line([350 350],[-59 -32],'Color',Color(:,cc),'LineWidth',lw)
 line([290 350],[-32 -32],'Color',Color(:,cc),'LineWidth',lw)
 line([290 350],[-59 -59],'Color',Color(:,cc),'LineWidth',lw)
 c = colorbar('eastoutside');
-c.Label.String = 'm';
 caxis([lb ub])
 xlabel('Latitude')
 ylabel('Longitude')
 zlabel('Depth')
-title('Argentine Basin Bathymetry in [-80,0] E x [-60,-30] S')
-print('Argentine_Basin_bathymetry_window_large','-djpeg')
+title('Argentine Basin Bathymetry in [80,0] W x [60,30] S','FontWeight','Normal')
+acc_plots
+acc_movie
 hold off
+print('Argentine_Basin_bathymetry_window_large','-djpeg')
 
 figure()
 set(gcf, 'Position', [25, 25, 1600, 900])
@@ -128,14 +135,17 @@ s = surf(X(lox:hix),Y(loy:hiy),Bath(loy:hiy,lox:hix));
 s.EdgeColor = 'none';
 axis([280 360 -60 -30 -10000 3000])
 c = colorbar('eastoutside');
-c.Label.String = 'm';
+xtickformat('degrees')
+ytickformat('degrees')
 caxis([lb ub])
 xlabel('Latitude')
 ylabel('Longitude')
 zlabel('Depth')
-title('Argentine Basin Bathymetry in [-80,0] E x [-60,-30] S')
-print('Argentine_Basin_bathymetry_window_large_surf','-djpeg')
+title('Argentine Basin Bathymetry in [80,0] W x [60,30] S','FontWeight','Normal')
+acc_plots
+acc_movie
 hold off
+print('Argentine_Basin_bathymetry_window_large_surf','-djpeg')
 
 
 lox = find(X>280,1);
@@ -155,14 +165,32 @@ line([350 350],[-59 -32],'Color',Color(:,cc),'LineWidth',lw)
 line([290 350],[-32 -32],'Color',Color(:,cc),'LineWidth',lw)
 line([290 350],[-59 -59],'Color',Color(:,cc),'LineWidth',lw)
 c = colorbar('eastoutside');
-c.Label.String = 'm';
 caxis([lb ub])
 xlabel('Latitude')
 ylabel('Longitude')
 zlabel('Depth')
-title('Argentine Basin Bathymetry in [-80,0] E x [-70,-30] S')
-print('Argentine_Basin_bathymetry_window_deep','-djpeg')
+title('Argentine Basin Bathymetry in [80,0] W x [70,30] S','FontWeight','Normal')
+acc_plots
+acc_movie
 hold off
+print('Argentine_Basin_bathymetry_window_deep','-djpeg')
+
+figure()
+set(gcf, 'Position', [25, 25, 1600, 900])
+colormap(bone)
+[C,h] = contourf(X(lox:hix),Y(loy:hiy),Bath(loy:hiy,lox:hix),z);
+hold on
+clabel(C,h,v)
+c = colorbar('eastoutside');
+caxis([lb ub])
+xlabel('Latitude')
+ylabel('Longitude')
+zlabel('Depth')
+title('Argentine Basin Bathymetry in [80,0] W x [70,30] S','FontWeight','Normal')
+acc_plots
+acc_movie
+hold off
+print('Argentine_Basin_bathymetry_window_deep2','-djpeg')
 
 
 
@@ -176,15 +204,18 @@ s2.FaceColor = Color(:,cc);
 colormap(flipud(bone))
 s = surf(X(lox:hix),Y(loy:hiy),Bath(loy:hiy,lox:hix));
 s.EdgeColor = 'none';
-c = colorbar('eastoutside');
-c.Label.String = 'm';
+% c = colorbar('eastoutside');
+xtickformat('degrees')
+ytickformat('degrees')
 axis([280 360 -70 -30 -15000 6000])
 caxis([lb ub])
-xlabel('Latitude')
-ylabel('Longitude')
-zlabel('Depth')
-title('Argentine Basin Bathymetry in [-80,0] E x [-70,-30] S')
-print('Argentine_Basin_bathymetry_window_deep_surf','-djpeg')
+% xlabel('Latitude')
+% ylabel('Longitude')
+% zlabel('Depth')
+zticks([-6000 -4000 -2000 0])
+title('Argentine Basin Bathymetry in [80,0] W x [70,30] S','FontWeight','Normal')
+acc_movie
 hold off
+print('Argentine_Basin_bathymetry_window_deep_surf','-djpeg')
 
 toc()
